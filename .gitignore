@@ -1,0 +1,47 @@
+base_local.txt
+cat > .gitignore << 'EOF'
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+
+# GCP
+*.json                   # Service Account Keys
+.gcloud/
+gcp-credentials.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dados
+data/
+checkpoints/
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+EOF
