@@ -1,4 +1,5 @@
 base_local.txt
+generate_docs.sh
 cat > .gitignore << 'EOF'
 # Terraform
 **/.terraform/*
