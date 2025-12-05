@@ -146,6 +146,7 @@ fi
 # Configurar Python para Spark
 echo "spark.pyspark.python ${PYTHON_VERSION}" >> /etc/spark/conf/spark-defaults.conf
 echo "spark.pyspark.driver.python ${PYTHON_VERSION}" >> /etc/spark/conf/spark-defaults.conf
+echo "spark.sql.catalogImplementation in-memory" >> /etc/spark/conf/spark-defaults.conf  # ✅ Força no-Hive
 
 # ==============================================================================
 # 6. VALIDAÇÃO

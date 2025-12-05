@@ -2,6 +2,8 @@ base_local.txt
 generate_docs.sh
 security.txt
 cat > .gitignore << 'EOF'
+generate_context_summary.sh
+novabase.txt
 # Terraform
 **/.terraform/*
 *.tfstate

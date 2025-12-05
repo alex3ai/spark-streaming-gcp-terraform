@@ -37,10 +37,7 @@ resource "google_storage_bucket" "data_lake" {
   }
 
   # Uniform bucket-level access (IAM simplificado)
-  uniform_bucket_level_access {
-    enabled = true
-  }
-
+  uniform_bucket_level_access = true
   labels = var.labels
 }
 

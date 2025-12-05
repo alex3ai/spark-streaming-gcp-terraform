@@ -25,6 +25,12 @@ variable "environment" {
   default     = "dev"
 }
 
+variable "dataproc_image_version" {
+  description = "Versão da imagem Dataproc (2.0-debian11 é mais estável para single-node)"
+  type        = string
+  default     = "2.1-debian11"  # Spark 3.3.2 + Hive Metastore estável
+}
+
 # ==============================================================================
 # NETWORK VARIABLES
 # ==============================================================================

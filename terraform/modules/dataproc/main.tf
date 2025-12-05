@@ -51,20 +51,12 @@ resource "google_dataproc_cluster" "spark_cluster" {
     # NETWORK CONFIGURATION
     # ==============================================================================
     gce_cluster_config {
-      network    = var.network_self_link
-      subnetwork = var.subnet_self_link
-      
+
       # Sem IP externo (economia + segurança)
       # ATENÇÃO: Exige Private Google Access habilitado na subnet
-      internal_ip_only = False
+      internal_ip_only = false
 
       tags = ["dataproc"]
-
-      # Metadata customizada (para scripts de inicialização)
-      metadata = {
-        "enable-oslogin" = "true"
-        "block-project-ssh-keys" = "false"
-      }
     }
 
     # ==============================================================================
@@ -72,38 +64,36 @@ resource "google_dataproc_cluster" "spark_cluster" {
     # ==============================================================================
     initialization_action {
       script      = "gs://${var.staging_bucket_name}/scripts/bootstrap.sh"
-      timeout_sec = 500
-    }
+      timeout_sec = 900  # 15 minutos (margem de segurança SRE)
+    } // <-- CHAVE CORRIGIDA
 
     # ==============================================================================
     # SOFTWARE CONFIGURATION
     # ==============================================================================
     software_config {
-      image_version = var.dataproc_image_version  # 2.1-debian11 (Spark 3.3)
-      
-      # Componentes opcionais (adicionar sob demanda)
-      optional_components = ["JUPYTER"]  # Para debug
-
-      # Properties customizadas do Spark
-      override_properties = {
-        # Spark Configuration
-        "spark:spark.executor.memory"          = "1g"
-        "spark:spark.executor.cores"           = "1"
-        "spark:spark.driver.memory"            = "1g"
-        "spark:spark.driver.maxResultSize"     = "512m"
-        
-        # Shuffle optimization
-        "spark:spark.sql.shuffle.partitions"   = "4"
-        "spark:spark.default.parallelism"      = "4"
-        
-        # Checkpoint configuration
-        "spark:spark.sql.streaming.checkpointLocation" = "gs://${var.staging_bucket_name}/checkpoints"
-        
-        # YARN (se usar workers)
-        "yarn:yarn.nodemanager.resource.memory-mb" = "3072"
-        "yarn:yarn.scheduler.maximum-allocation-mb" = "3072"
-      }
-    }
+  image_version = var.dataproc_image_version
+  
+  # CRITICAL: Remover HIVE dos componentes opcionais
+  optional_components = []  # Vazio = sem Jupyter, sem Hive extra
+  
+  override_properties = {
+    # Desabilita Hive explicitamente
+    "dataproc:dataproc.components.activate" = "SPARK,HDFS,YARN,MAPREDUCE,GCS_CONNECTOR"
+    
+    # Força Spark a NÃO usar Hive Metastore
+    "spark:spark.sql.catalogImplementation" = "in-memory"  # Usa catálogo em memória
+    "spark:spark.sql.hive.metastore.version" = ""  # String vazia desabilita
+    
+    # Configurações Spark (manter as existentes)
+    "spark:spark.executor.memory"           = "1g"
+    "spark:spark.driver.memory"             = "1g"
+    "spark:spark.sql.shuffle.partitions"    = "4"
+    
+    # YARN (manter)
+    "yarn:yarn.nodemanager.resource.memory-mb" = "6144"  # Mais RAM disponível sem Hive
+    "yarn:yarn.scheduler.maximum-allocation-mb" = "6144"
+  }
+}
 
     # ==============================================================================
     # LIFECYCLE CONFIGURATION (Auto-delete)
@@ -111,9 +101,6 @@ resource "google_dataproc_cluster" "spark_cluster" {
     lifecycle_config {
       # CRÍTICO: Cluster temporário (desliga automaticamente após idle)
       idle_delete_ttl = var.idle_delete_ttl  # Ex: "3600s" = 1 hora
-      
-      # OU: Auto-delete em horário específico
-      # auto_delete_time = timeadd(timestamp(), "2h")
     }
 
     # ==============================================================================

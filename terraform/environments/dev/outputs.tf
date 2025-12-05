@@ -64,6 +64,17 @@ output "cluster_bucket" {
   value       = module.dataproc.cluster_bucket
 }
 
+output "dataproc_service_account" {
+  description = "Service Account do Dataproc"
+  value       = module.dataproc.service_account_email
+  sensitive   = true
+}
+
+output "spark_ui_access" {
+  description = "Como acessar a Spark UI"
+  value       = module.dataproc.spark_ui_url
+}
+
 # ==============================================================================
 # CUSTOS ESTIMADOS (Informacional)
 # ==============================================================================

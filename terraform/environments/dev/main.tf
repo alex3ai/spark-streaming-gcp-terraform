@@ -81,7 +81,7 @@ module "dataproc" {
   worker_boot_disk_size_gb = var.worker_boot_disk_size_gb
 
   # Software configuration
-  dataproc_image_version = "2.1-debian11"
+  dataproc_image_version = var.dataproc_image_version // Deve usar a variável, não um valor hardcoded
   staging_bucket_name    = module.storage.bucket_name
 
   # Lifecycle (AUTO-DELETE após 1 hora de idle)
