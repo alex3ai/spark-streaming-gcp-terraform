@@ -5,6 +5,7 @@ cat > .gitignore << 'EOF'
 generate_context_summary.sh
 novabase.txt
 project_summary_for_ai.txt
+spark_job_package.zip
 # Terraform
 **/.terraform/*
 *.tfstate
@@ -50,3 +51,8 @@ logs/
 .DS_Store
 Thumbs.db
 EOF
+
+# Arquivos de Output e Binários
+*.zip
+*.tfplan
+tfplan
