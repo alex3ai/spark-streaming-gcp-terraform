@@ -17,7 +17,7 @@ class Config:
     # Project ID (ler de metadata service no Dataproc)
     GCP_PROJECT_ID = os.environ.get(
         "GCP_PROJECT_ID",
-        "spark-streaming-dev"  # Default para desenvolvimento local
+        "spark-streaming-gcp-terraform"  # CORRIGIDO
     )
     
     # Cloud Storage

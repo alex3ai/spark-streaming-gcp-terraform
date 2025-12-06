@@ -17,7 +17,7 @@ BUCKET_NAME=$1
 PACKAGE_DIR="app"
 OUTPUT_FILE="spark_job_package.zip"
 
-echo "Ì≥¶ Empacotando job Spark..."
+echo "ÔøΩÔøΩÔøΩ Empacotando job Spark..."
 
 # Remover pacote antigo
 rm -f ${OUTPUT_FILE}
@@ -32,13 +32,16 @@ zip -r ${OUTPUT_FILE} ${PACKAGE_DIR} \
 echo "‚úÖ Pacote criado: ${OUTPUT_FILE}"
 
 # Upload para GCS
-echo "Ì≥§ Fazendo upload do pacote para GCS..."
+echo "ÔøΩÔøΩÔøΩ Fazendo upload do pacote para GCS..."
 gsutil cp ${OUTPUT_FILE} gs://${BUCKET_NAME}/jobs/
 
 # Upload do arquivo principal do job para a raiz de jobs/
-echo "Ì≥§ Fazendo upload do job principal..."
+echo "ÔøΩÔøΩÔøΩ Fazendo upload do job principal..."
 gsutil cp ${PACKAGE_DIR}/jobs/sentiment.py gs://${BUCKET_NAME}/jobs/
 
 echo "‚úÖ Upload conclu√≠do!"
-echo "Ì≥Å Pacote: gs://${BUCKET_NAME}/jobs/${OUTPUT_FILE}"
-echo "Ì≥Ñ Main Job: gs://${BUCKET_NAME}/jobs/sentiment.py"
+echo "ÔøΩÔøΩÔøΩ Pacote: gs://${BUCKET_NAME}/jobs/${OUTPUT_FILE}"
+echo "ÔøΩÔøΩÔøΩ Main Job: gs://${BUCKET_NAME}/jobs/sentiment.py"
+
+# Cria o ZIP com a pasta 'app' e seu conte√∫do na raiz do ZIP
+zip -r ${OUTPUT_FILE} app/
