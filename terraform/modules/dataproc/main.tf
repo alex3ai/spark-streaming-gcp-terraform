@@ -78,20 +78,21 @@ resource "google_dataproc_cluster" "spark_cluster" {
   
   override_properties = {
     # Desabilita Hive explicitamente
-    "dataproc:dataproc.components.activate" = "SPARK,HDFS,YARN,MAPREDUCE,GCS_CONNECTOR"
+    # "dataproc:dataproc.components.activate" = "SPARK,HDFS,YARN,MAPREDUCE,GCS_CONNECTOR"
     
     # Força Spark a NÃO usar Hive Metastore
-    "spark:spark.sql.catalogImplementation" = "in-memory"  # Usa catálogo em memória
-    "spark:spark.sql.hive.metastore.version" = ""  # String vazia desabilita
+    # "spark:spark.sql.catalogImplementation" = "in-memory"  # Usa catálogo em memória
+    # "spark:spark.sql.hive.metastore.version" = ""  # String vazia desabilita
     
     # Configurações Spark (manter as existentes)
     "spark:spark.executor.memory"           = "1g"
     "spark:spark.driver.memory"             = "1g"
+    "spark:spark.executor.cores"            = "2"
     "spark:spark.sql.shuffle.partitions"    = "4"
     
     # YARN (manter)
-    "yarn:yarn.nodemanager.resource.memory-mb" = "6144"  # Mais RAM disponível sem Hive
-    "yarn:yarn.scheduler.maximum-allocation-mb" = "6144"
+    "yarn:yarn.nodemanager.resource.memory-mb" = "12288"  # Mais RAM disponível sem Hive
+    "yarn:yarn.scheduler.maximum-allocation-mb" = "12288"
   }
 }
 
