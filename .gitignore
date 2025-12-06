@@ -4,6 +4,7 @@ security.txt
 cat > .gitignore << 'EOF'
 generate_context_summary.sh
 novabase.txt
+project_summary_for_ai.txt
 # Terraform
 **/.terraform/*
 *.tfstate
