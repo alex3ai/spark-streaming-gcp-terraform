@@ -14,34 +14,38 @@ if [ $# -ne 1 ]; then
 fi
 
 BUCKET_NAME=$1
-PACKAGE_DIR="app"
 OUTPUT_FILE="spark_job_package.zip"
 
-echo "��� Empacotando job Spark..."
+echo "📦 Empacotando job Spark..."
 
-# Remover pacote antigo
+# Remover pacote antigo para garantir que não haja lixo
 rm -f ${OUTPUT_FILE}
 
-# Zipar a pasta 'app' mantendo a estrutura para imports funcionarem
-zip -r ${OUTPUT_FILE} ${PACKAGE_DIR} \
+# ------------------------------------------------------------------------------
+# CRIAÇÃO DO ZIP
+# O segredo aqui é zipar a pasta 'app/' recursivamente.
+# Isso cria um zip que contém a pasta 'app' na raiz.
+# Quando o Spark descompacta, ele vê a pasta 'app', permitindo:
+# "from app.config import settings"
+# ------------------------------------------------------------------------------
+zip -r ${OUTPUT_FILE} app/ \
     -x "*.pyc" \
     -x "*__pycache__/*" \
-    -x "*scripts/*" \
+    -x "app/docs/*" \
+    -x "app/scripts/*" \
     -x "*.DS_Store"
 
 echo "✅ Pacote criado: ${OUTPUT_FILE}"
 
 # Upload para GCS
-echo "��� Fazendo upload do pacote para GCS..."
+echo "📤 Fazendo upload do pacote para GCS..."
 gsutil cp ${OUTPUT_FILE} gs://${BUCKET_NAME}/jobs/
 
-# Upload do arquivo principal do job para a raiz de jobs/
-echo "��� Fazendo upload do job principal..."
-gsutil cp ${PACKAGE_DIR}/jobs/sentiment.py gs://${BUCKET_NAME}/jobs/
+# Upload do arquivo principal do job (sentiment.py) separadamente
+# O arquivo principal fica fora do zip para ser o ponto de entrada
+echo "📤 Fazendo upload do job principal..."
+gsutil cp app/jobs/sentiment.py gs://${BUCKET_NAME}/jobs/
 
 echo "✅ Upload concluído!"
-echo "��� Pacote: gs://${BUCKET_NAME}/jobs/${OUTPUT_FILE}"
-echo "��� Main Job: gs://${BUCKET_NAME}/jobs/sentiment.py"
-
-# Cria o ZIP com a pasta 'app' e seu conteúdo na raiz do ZIP
-zip -r ${OUTPUT_FILE} app/
+echo "📦 Pacote: gs://${BUCKET_NAME}/jobs/${OUTPUT_FILE}"
+echo "📄 Main Job: gs://${BUCKET_NAME}/jobs/sentiment.py"

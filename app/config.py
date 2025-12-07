@@ -1,99 +1,49 @@
+# Abra o arquivo: app/config.py
+# Substitua o conteúdo ou edite a seção relevante:
+
 import os
 
-
 class Config:
-    # ==============================================================================
-    # ENVIRONMENT DETECTION
-    # ==============================================================================
-    
-    # Detectar se está rodando no Dataproc
+    # ... (Mantenha as configurações anteriores de Environment Detection e GCP) ...
     IS_DATAPROC = os.path.exists("/usr/local/share/google/dataproc")
     IS_DOCKER = os.path.exists("/.dockerenv")
-    
+
+    GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "spark-streaming-gcp-terraform")
+    GCS_BUCKET = os.environ.get("GCS_BUCKET", f"{GCP_PROJECT_ID}-data-lake")
+
     # ==============================================================================
-    # GCP CONFIGURATION
+    # STREAMING SOURCE CONTROL (SRE WAR STRATEGY)
     # ==============================================================================
-    
-    # Project ID (ler de metadata service no Dataproc)
-    GCP_PROJECT_ID = os.environ.get(
-        "GCP_PROJECT_ID",
-        "spark-streaming-gcp-terraform"  # CORRIGIDO
-    )
-    
-    # Cloud Storage
-    GCS_BUCKET = os.environ.get(
-        "GCS_BUCKET",
-        f"{GCP_PROJECT_ID}-data-lake"
-    )
-    
+    # 'rate' = Gera dados sintéticos (para teste de infra)
+    # 'pubsub' = Tenta conectar no Pub/Sub (requer JARs corretos)
+    # 'kafka' = Conecta no Kafka
+    STREAM_SOURCE = os.environ.get("STREAM_SOURCE", "rate") 
+
     # ==============================================================================
-    # KAFKA/PUB-SUB CONFIGURATION
+    # KAFKA / PUBSUB CONFIG
     # ==============================================================================
-    
-    # OPÇÃO 1: Kafka (para manter compatibilidade com projeto local)
-    KAFKA_BOOTSTRAP_SERVERS = os.environ.get(
-        "KAFKA_BOOTSTRAP_SERVERS",
-        "kafka:9092" if IS_DOCKER else "127.0.0.1:9094"
-    )
-    
+    KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092" if IS_DOCKER else "127.0.0.1:9094")
     KAFKA_TOPIC_INPUT = "raw-tweets"
     KAFKA_TOPIC_OUTPUT = "processed-sentiment"
-    
-    # OPÇÃO 2: Google Pub/Sub (para produção na nuvem)
-    PUBSUB_TOPIC_INPUT = f"projects/{GCP_PROJECT_ID}/topics/raw-tweets"
-    PUBSUB_TOPIC_OUTPUT = f"projects/{GCP_PROJECT_ID}/topics/processed-sentiment"
-    PUBSUB_SUBSCRIPTION = f"projects/{GCP_PROJECT_ID}/subscriptions/sentiment-processor"
-    
-    # Selecionar backend baseado no ambiente
-    USE_PUBSUB = IS_DATAPROC
-    
-    # ==============================================================================
-    # SPARK CONFIGURATION
-    # ==============================================================================
-    
-    SPARK_APP_NAME = "SentimentAnalysisStream-GCP"
-    
-    # Master URL (local para Dataproc, já que roda standalone)
-    if IS_DATAPROC:
-        SPARK_MASTER = "yarn"  # Dataproc usa YARN por padrão
-    elif IS_DOCKER:
-        SPARK_MASTER = "spark://spark-master:7077"
-    else:
-        SPARK_MASTER = "local[*]"
-    
-    # ==============================================================================
-    # STORAGE PATHS (GCS)
-    # ==============================================================================
-    
-    # Checkpoints
-    CHECKPOINT_LOCATION = (
-        f"gs://{GCS_BUCKET}/checkpoints/sentiment_job_v1"
-        if IS_DATAPROC
-        else "/data/checkpoints/sentiment_job_v1"
-    )
-    
-    # Data paths
-    DATA_RAW_PATH = f"gs://{GCS_BUCKET}/data/raw"
-    DATA_PROCESSED_PATH = f"gs://{GCS_BUCKET}/data/processed"
-    
-    # ==============================================================================
-    # NLTK CONFIGURATION
-    # ==============================================================================
-    
-    if IS_DATAPROC:
-        NLTK_DATA_DIR = "/usr/local/share/nltk_data"
-    else:
-        NLTK_DATA_DIR = "/opt/spark/nltk_data"
-    
-    # ==============================================================================
-    # SPARK TUNING (Dataproc-specific)
-    # ==============================================================================
-    
-    if IS_DATAPROC:
-        SPARK_EXECUTOR_MEMORY = "1g"
-        SPARK_DRIVER_MEMORY = "1g"
-        SPARK_EXECUTOR_CORES = "1"
-        SPARK_SQL_SHUFFLE_PARTITIONS = "4"
 
+    PUBSUB_SUBSCRIPTION = f"projects/{GCP_PROJECT_ID}/subscriptions/sentiment-sub"
+
+    # ==============================================================================
+    # SPARK CONFIG
+    # ==============================================================================
+    SPARK_APP_NAME = "SentimentAnalysisStream-GCP"
+    SPARK_MASTER = "yarn" if IS_DATAPROC else "local[*]"
+
+    # ==============================================================================
+    # STORAGE PATHS
+    # ==============================================================================
+    # Checkpoint único para evitar conflitos
+    CHECKPOINT_LOCATION = f"gs://{GCS_BUCKET}/checkpoints/sentiment_job_rate_v1" if IS_DATAPROC else "/data/checkpoints/v1"
+    
+    # NLTK
+    NLTK_DATA_DIR = "/usr/local/share/nltk_data" if IS_DATAPROC else "/opt/spark/nltk_data"
+    
+    # Tuning
+    SPARK_SQL_SHUFFLE_PARTITIONS = "4"
 
 settings = Config()
