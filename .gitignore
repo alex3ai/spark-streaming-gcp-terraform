@@ -4,8 +4,10 @@ security.txt
 cat > .gitignore << 'EOF'
 generate_context_summary.sh
 novabase.txt
+nova_base.txt
 project_summary_for_ai.txt
 spark_job_package.zip
+dataproc_job.properties
 # Terraform
 **/.terraform/*
 *.tfstate
@@ -18,7 +20,6 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 terraform.rc
-
 # Python
 __pycache__/
 *.py[cod]
